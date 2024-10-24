@@ -10,13 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 
 const JsonFormatter: React.FC = () => {
-  const [inputJson, setInputJson] = useState(`{
-  "name": "John Doe",
-  "age": 30,
-  "city": "New York",
-  "hobbies": ["reading", "swimming", "coding"],
-  "isStudent": false
-}`);
+  const [inputJson, setInputJson] = useState(``);
   const [formattedJson, setFormattedJson] = useState('');
   const [tabSpacing, setTabSpacing] = useState('4');
   const [wrap, setWrap] = useState(false);
