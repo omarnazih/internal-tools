@@ -1,0 +1,22 @@
+# Cursor
+
+# 1. Tech Stack 
+- Next.js 14
+- Tailwind CSS
+- TypeScript
+- Shadcn UI
+
+# folders
+- components
+- lib
+- app
+- types
+- utils
+
+# roles
+- the main folder is the app folder following the app directory structure
+- components are in the components folder
+- lib is for libraries
+- types are for typescript types
+- utils are for utility functions
+- you can create your own folders and files, but make sure to update the sitemap.

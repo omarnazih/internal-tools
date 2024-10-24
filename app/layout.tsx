@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css"
 import { Inter as FontSans } from "next/font/google"
+import { Toaster } from "@/components/ui/toaster"
+import { Sidebar } from "@/components/Layout/Sidebar"
 
 import { cn } from "@/lib/utils"
 
@@ -22,12 +24,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-              className={cn(
-                "min-h-screen bg-background font-sans antialiased",
-                fontSans.variable
-              )}
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable
+        )}
       >
-       {children}
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <div className="flex-1">
+            <main className="flex-1 p-4 md:p-6">
+              {children}
+            </main>
+          </div>
+        </div>
+        <Toaster />
       </body>
     </html>
   );
