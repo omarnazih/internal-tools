@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ClipboardIcon, CodeIcon } from "lucide-react"
+import { ClipboardIcon, CodeIcon, BracketsIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Sidebar() {
@@ -11,6 +11,7 @@ export function Sidebar() {
   const navItems = [
     { href: "/", icon: CodeIcon, label: "Base64 Converter" },
     { href: "/post-generator", icon: ClipboardIcon, label: "Post Generator" },
+    { href: "/json-formatter", icon: BracketsIcon, label: "JSON Formatter" },
     // Add more navigation items here
   ]
 
