@@ -52,6 +52,10 @@ ${formatBulletPoints(formData.prs)}
     });
   };
 
+  const handleGeneratedPostChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setGeneratedPost(e.target.value);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -93,10 +97,13 @@ ${formatBulletPoints(formData.prs)}
             <CardTitle>Generated Post</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="whitespace-pre-wrap bg-gray-100 p-4 rounded-md min-h-[200px]">
-              {generatedPost}
-            </pre>
-            <Button onClick={copyToClipboard} className="mt-4" disabled={!generatedPost}>
+            <Textarea
+              className="min-h-[200px] mb-4"
+              value={generatedPost}
+              onChange={handleGeneratedPostChange}
+              placeholder="Generated post will appear here"
+            />
+            <Button onClick={copyToClipboard} disabled={!generatedPost}>
               Copy to Clipboard
             </Button>
           </CardContent>
