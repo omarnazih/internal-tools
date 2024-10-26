@@ -16,7 +16,7 @@ export function Sidebar() {
   ]
 
   return (
-    <div className="w-64 border-r bg-gray-100/40 dark:bg-gray-800/40">
+    <aside className="w-64 bg-gray-100 p-4 dark:bg-gray-800">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-[60px] items-center border-b px-6">
           <Link className="flex items-center gap-2 font-semibold" href="#">
@@ -44,7 +44,7 @@ export function Sidebar() {
           </nav>
         </div>
       </div>
-    </div>
+    </aside>
   )
 }
 

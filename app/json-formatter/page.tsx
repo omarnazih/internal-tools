@@ -90,7 +90,7 @@ const JsonFormatter: React.FC = () => {
           <CardContent>
             <div className="relative">
               <pre
-                className={`min-h-[200px] mb-4 p-4 bg-gray-100 rounded-md overflow-auto ${
+                className={`min-h-[200px] mb-4 p-4 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-md overflow-auto ${
                   wrap ? 'whitespace-pre-wrap' : 'whitespace-pre'
                 }`}
                 style={{ maxHeight: '400px' }}

@@ -3,6 +3,8 @@ import "@/styles/globals.css"
 import { Inter as FontSans } from "next/font/google"
 import { Toaster } from "@/components/ui/toaster"
 import { Sidebar } from "@/components/Layout/Sidebar"
+import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 import { cn } from "@/lib/utils"
 
@@ -22,22 +24,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <div className="flex-1">
-            <main className="flex-1 p-4 md:p-6">
-              {children}
-            </main>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="flex min-h-screen">
+            <Sidebar />
+            <div className="flex-1 relative">
+              <main className="flex-1 p-4 md:p-6">
+                {children}
+              </main>
+              <div className="fixed bottom-4 right-4">
+                <ThemeToggle />
+              </div>
+            </div>
           </div>
-        </div>
-        <Toaster />
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
