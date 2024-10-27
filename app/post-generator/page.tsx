@@ -4,15 +4,16 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const PostGenerator: React.FC = () => {
   const [formData, setFormData] = useState({
-    ticketLink: '',
+    tickets: '',
     description: '',
     solution: '',
+    branch: 'qa-hotfixes',
     prs: ''
   });
   const [generatedPost, setGeneratedPost] = useState('');
@@ -27,10 +28,30 @@ const PostGenerator: React.FC = () => {
     return text.split('\n').map(line => `\t• ${line.trim()}`).join('\n');
   };
 
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, branch: value }));
+  };
+
+  const formatPRs = (branch: string, prs: string) => {
+    return prs.split('\n').map(pr => {
+      const trimmedPR = pr.trim();
+      const githubRegex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/\d+/;
+      const match = trimmedPR.match(githubRegex);
+      
+      if (match) {
+        const repoName = match[2];
+        return `\t• ${repoName} (${branch}) -> ${trimmedPR}`;
+      } else {
+        return `\t• (${branch}) -> ${trimmedPR}`;
+      }
+    }).join('\n');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const post = `
-Ticket: ${formData.ticketLink}
+Tickets: 
+${formatBulletPoints(formData.tickets)}
 
 Description:
 ${formatBulletPoints(formData.description)}
@@ -39,7 +60,7 @@ Solution:
 ${formatBulletPoints(formData.solution)}
 
 PRs:
-${formatBulletPoints(formData.prs)}
+${formatPRs(formData.branch, formData.prs)}
     `.trim();
     setGeneratedPost(post);
   };
@@ -61,32 +82,47 @@ ${formatBulletPoints(formData.prs)}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Post Generator</CardTitle>
+            <CardTitle>Code Review Post Generator</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {Object.entries(formData).map(([key, value]) => (
+              {['tickets', 'description', 'solution'].map((key) => (
                 <div key={key}>
                   <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
-                  {key === 'ticketLink' ? (
-                    <Input
-                      id={key}
-                      name={key}
-                      value={value}
-                      onChange={handleChange}
-                      placeholder="Enter ticket link"
-                    />
-                  ) : (
-                    <Textarea
-                      id={key}
-                      name={key}
-                      value={value}
-                      onChange={handleChange}
-                      placeholder="Enter points (one per line)"
-                    />
-                  )}
+                  <Textarea
+                    id={key}
+                    name={key}
+                    value={formData[key as keyof typeof formData]}
+                    onChange={handleChange}
+                    placeholder="Enter points (one per line)"
+                  />
                 </div>
               ))}
+              <div>
+                <Label htmlFor="branch">Branch</Label>
+                <Select onValueChange={handleSelectChange} defaultValue={formData.branch}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="master">master</SelectItem>
+                    <SelectItem value="hotfixes">hotfixes</SelectItem>
+                    <SelectItem value="qa-hotfixes">qa-hotfixes</SelectItem>
+                    <SelectItem value="pre-hotfixes">pre-hotfixes</SelectItem>
+                    <SelectItem value="dev">dev</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="prs">PRs</Label>
+                <Textarea
+                  id="prs"
+                  name="prs"
+                  value={formData.prs}
+                  onChange={handleChange}
+                  placeholder="Enter PR links or text (one per line)"
+                />
+              </div>
               <Button type="submit">Generate Post</Button>
             </form>
           </CardContent>

@@ -10,7 +10,7 @@ export function Sidebar() {
 
   const navItems = [
     { href: "/", icon: CodeIcon, label: "Base64 Converter" },
-    { href: "/post-generator", icon: ClipboardIcon, label: "Post Generator" },
+    { href: "/post-generator", icon: ClipboardIcon, label: "CR Post Generator" },
     { href: "/json-formatter", icon: BracketsIcon, label: "JSON Formatter" },
     // Add more navigation items here
   ]
