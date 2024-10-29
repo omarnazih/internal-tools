@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 const Base64Converter: React.FC = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [mode, setMode] = useState('encode');
+  const [mode, setMode] = useState('decode');
   const [iterations, setIterations] = useState('3');
   const { toast } = useToast();
 
