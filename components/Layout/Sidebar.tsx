@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ClipboardIcon, CodeIcon, BracketsIcon } from "lucide-react"
+import { ClipboardIcon, CodeIcon, BracketsIcon, Github } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Sidebar() {
@@ -12,6 +12,7 @@ export function Sidebar() {
     { href: "/", icon: CodeIcon, label: "Base64 Converter" },
     { href: "/post-generator", icon: ClipboardIcon, label: "CR Post Generator" },
     { href: "/json-formatter", icon: BracketsIcon, label: "JSON Formatter" },
+    { href: "/branching-guide", icon: Github, label: "Branching Guide" },
     // Add more navigation items here
   ]
 
@@ -47,5 +48,5 @@ export function Sidebar() {
     </aside>
   )
 }
-
 // Include the icon components here (CodeIcon, ClipboardIcon, etc.)
+
