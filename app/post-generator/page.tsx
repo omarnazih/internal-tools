@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const PostGenerator: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,14 @@ const PostGenerator: React.FC = () => {
   const [generatedPost, setGeneratedPost] = useState('');
   const { toast } = useToast()
 
+  const quickAccessBranches = [
+    { name: 'master', variant: 'outline' as const },
+    { name: 'hotfixes', variant: 'outline' as const },
+    { name: 'qa-hotfixes', variant: 'outline' as const },
+    { name: 'pre-hotfixes', variant: 'outline' as const },
+    { name: 'dev', variant: 'outline' as const },
+  ];
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -26,10 +35,6 @@ const PostGenerator: React.FC = () => {
 
   const formatBulletPoints = (text: string) => {
     return text.split('\n').map(line => `\t• ${line.trim()}`).join('\n');
-  };
-
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, branch: value }));
   };
 
   const formatPRs = (branch: string, prs: string) => {
@@ -79,7 +84,7 @@ ${formatPRs(formData.branch, formData.prs)}
 
   return (
     <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Code Review Post Generator</CardTitle>
@@ -98,20 +103,35 @@ ${formatPRs(formData.branch, formData.prs)}
                   />
                 </div>
               ))}
-              <div>
-                <Label htmlFor="branch">Branch</Label>
-                <Select onValueChange={handleSelectChange} defaultValue={formData.branch}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select branch" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="master">master</SelectItem>
-                    <SelectItem value="hotfixes">hotfixes</SelectItem>
-                    <SelectItem value="qa-hotfixes">qa-hotfixes</SelectItem>
-                    <SelectItem value="pre-hotfixes">pre-hotfixes</SelectItem>
-                    <SelectItem value="dev">dev</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <Label>Branch</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {quickAccessBranches.map((branch) => (
+                    <Button
+                      key={branch.name}
+                      variant={branch.variant}
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setFormData(prev => ({ ...prev, branch: branch.name }));
+                      }}
+                      className={cn(
+                        "text-sm",
+                        formData.branch === branch.name && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      {branch.name}
+                    </Button>
+                  ))}
+                </div>
+                <Input
+                  id="branch"
+                  name="branch"
+                  value={formData.branch}
+                  onChange={handleChange}
+                  placeholder="Enter branch name"
+                  className="w-full"
+                />
               </div>
               <div>
                 <Label htmlFor="prs">PRs</Label>
