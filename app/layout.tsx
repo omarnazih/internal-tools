@@ -39,10 +39,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-screen">
+          <div className="flex min-h-screen relative">
             <Sidebar />
-            <div className="flex-1 relative">
-              <main className="flex-1 p-4 md:p-6">
+            <div className="flex-1">
+              <main className="flex-1 p-4 md:p-6 lg:p-8">
                 {children}
                 <Analytics />
               </main>
