@@ -28,9 +28,87 @@ const PostGenerator: React.FC = () => {
     { name: 'dev', variant: 'outline' as const },
   ];
 
+  const parseGeneratedPost = (text: string) => {
+    try {
+      const sections: Record<string, string> = {};
+      let currentSection = '';
+      let content: string[] = [];
+
+      text.split('\n').forEach(line => {
+        if (line.trim() === '') return;
+
+        if (line.toLowerCase().includes('ticket')) {
+          if (currentSection && content.length) {
+            sections[currentSection.toLowerCase()] = content
+              .map(item => item.trim().replace(/^[•\-]\s*/, ''))
+              .join('\n');
+          }
+          currentSection = 'tickets';
+          content = [];
+        } else if (line.endsWith(':')) {
+          if (currentSection && content.length) {
+            sections[currentSection.toLowerCase()] = content
+              .map(item => item.trim().replace(/^[•\-]\s*/, ''))
+              .join('\n');
+          }
+          currentSection = line.replace(':', '').trim();
+          content = [];
+        } else {
+          content.push(line);
+        }
+      });
+
+      // Save last section
+      if (currentSection && content.length) {
+        sections[currentSection.toLowerCase()] = content
+          .map(item => item.trim().replace(/^[•\-]\s*/, ''))
+          .join('\n');
+      }
+
+      // Extract branch from PRs section
+      const prSection = sections['prs'] || '';
+      const branchMatch = prSection.match(/\(([\w-]+)\)/);
+      const branch = branchMatch ? branchMatch[1] : formData.branch;
+
+      setFormData(prev => ({
+        ...prev,
+        tickets: sections['tickets'] || prev.tickets,
+        description: sections['description'] || prev.description,
+        solution: sections['solution'] || prev.solution,
+        branch: branch,
+        prs: prSection.split('\n')
+          .map(pr => pr.replace(/^.*-> /, '').trim())
+          .join('\n')
+      }));
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Parse error",
+        description: "Could not parse the content format"
+      });
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Regenerate post when fields change
+    const updatedData = { ...formData, [name]: value };
+    const post = `
+Tickets: 
+${formatBulletPoints(updatedData.tickets)}
+
+Description:
+${formatBulletPoints(updatedData.description)}
+
+Solution:
+${formatBulletPoints(updatedData.solution)}
+
+PRs:
+${formatPRs(updatedData.branch, updatedData.prs)}
+    `.trim();
+    setGeneratedPost(post);
   };
 
   const formatBulletPoints = (text: string) => {
@@ -79,7 +157,9 @@ ${formatPRs(formData.branch, formData.prs)}
   };
 
   const handleGeneratedPostChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setGeneratedPost(e.target.value);
+    const newValue = e.target.value;
+    setGeneratedPost(newValue);
+    parseGeneratedPost(newValue);
   };
 
   return (
