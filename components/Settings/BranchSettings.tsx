@@ -17,7 +17,7 @@ export const BranchSettings: React.FC = () => {
   const { toast } = useToast();
 
   const defaultBranches: Branch[] = [
-    { name: 'main', variant: 'outline' },
+    { name: 'master', variant: 'outline' },
     { name: 'hotfixes', variant: 'outline' },
     { name: 'qa-hotfixes', variant: 'outline' },
     { name: 'pre-hotfixes', variant: 'outline' },

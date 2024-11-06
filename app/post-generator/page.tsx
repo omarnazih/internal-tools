@@ -247,6 +247,18 @@ ${formatPRs(formData.branch, formData.prs)}
                 selectedBranch={formData.branch}
                 onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
               />
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <Label htmlFor="custom-branch">Custom Branch</Label>
+                  <Input
+                    id="custom-branch"
+                    name="branch"
+                    value={formData.branch}
+                    onChange={handleChange}
+                    placeholder="Enter custom branch name"
+                  />
+                </div>
+              </div>
               <div>
                 <Label htmlFor="prs">PRs</Label>
                 <Textarea
