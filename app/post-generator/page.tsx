@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { AlertCircle } from "lucide-react";
 
 const PostGenerator: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const PostGenerator: React.FC = () => {
   });
   const [generatedPost, setGeneratedPost] = useState('');
   const { toast } = useToast()
+  const [spellErrors, setSpellErrors] = useState<{word: string, suggestions: string[]}[]>([]);
 
   const quickAccessBranches = [
     { name: 'master', variant: 'outline' as const },
@@ -89,10 +91,56 @@ const PostGenerator: React.FC = () => {
     }
   };
 
+  const checkSpelling = async (text: string) => {
+    if (!('spellcheck' in document.createElement('textarea'))) {
+      return; // Browser doesn't support spellcheck
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+
+    const words = text.split(/\s+/);
+    const errors: {word: string, suggestions: string[]}[] = [];
+
+    for (const word of words) {
+      if (word.trim()) {
+        textarea.value = word;
+        const misspelled = !textarea.spellcheck;
+        if (misspelled) {
+          // Get suggestions if available
+          const suggestions = await new Promise<string[]>((resolve) => {
+            textarea.addEventListener('spellchecksuggestions', (event: any) => {
+              resolve(event.detail?.suggestions || []);
+            }, { once: true });
+            textarea.dispatchEvent(new Event('spellcheck'));
+          });
+          errors.push({ word, suggestions });
+        }
+      }
+    }
+
+    document.body.removeChild(textarea);
+    setSpellErrors(errors);
+
+    if (errors.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Spelling/Grammar Issues Found",
+        description: `Found ${errors.length} potential issues in description`,
+      });
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
+    // Check spelling for description field
+    if (name === 'description') {
+      checkSpelling(value);
+    }
+
     // Regenerate post when fields change
     const updatedData = { ...formData, [name]: value };
     const post = `
