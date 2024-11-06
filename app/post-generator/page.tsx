@@ -112,7 +112,17 @@ ${formatPRs(updatedData.branch, updatedData.prs)}
   };
 
   const formatBulletPoints = (text: string) => {
-    return text.split('\n').map(line => `\t• ${line.trim()}`).join('\n');
+    return text.split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map((line, index) => {
+        // Split on newlines within the line and maintain tabbing
+        const subLines = line.split('\n');
+        return subLines.map((subLine, subIndex) => 
+          subIndex === 0 ? `\t• ${subLine}` : `\t  ${subLine}`
+        ).join('\n');
+      })
+      .join('\n');
   };
 
   const formatPRs = (branch: string, prs: string) => {
