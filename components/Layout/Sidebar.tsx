@@ -3,7 +3,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ClipboardIcon, CodeIcon, BracketsIcon, Github, Menu, X } from "lucide-react"
+import { ClipboardIcon, CodeIcon, BracketsIcon, Github, Menu, X, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Sidebar() {
@@ -32,7 +32,7 @@ export function Sidebar() {
         "fixed inset-y-0 left-0 z-40 w-64 bg-gray-100 p-4 dark:bg-gray-800 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="flex h-full max-h-screen flex-col gap-2">
+        <div className="flex h-full max-h-screen flex-col">
           <div className="flex h-[60px] items-center border-b px-6">
             <Link className="flex items-center gap-2 font-semibold" href="#">
               <CodeIcon className="h-6 w-6" />
@@ -58,6 +58,21 @@ export function Sidebar() {
                 </Link>
               ))}
             </nav>
+          </div>
+          <div className="border-t pt-2">
+            <Link
+              href="/settings"
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all mx-4",
+                pathname === "/settings"
+                  ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
+                  : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+              )}
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
           </div>
         </div>
       </aside>

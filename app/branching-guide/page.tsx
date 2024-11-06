@@ -8,18 +8,19 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { QuickAccessBranches, type Branch } from "@/components/QuickAccessBranches";
 
 const BranchingGuide: React.FC = () => {
   const [ticketNumber, setTicketNumber] = useState('');
   const [sourceBranch, setSourceBranch] = useState('qa-hotfixes');
   const { toast } = useToast();
 
-  const quickAccessBranches = [
-    { name: 'main', variant: 'outline' as const },
-    { name: 'hotfixes', variant: 'outline' as const },
-    { name: 'qa-hotfixes', variant: 'outline' as const },
-    { name: 'pre-hotfixes', variant: 'outline' as const },
-    { name: 'dev', variant: 'outline' as const },
+  const defaultBranches: Branch[] = [
+    { name: 'main', variant: 'outline' },
+    { name: 'hotfixes', variant: 'outline' },
+    { name: 'qa-hotfixes', variant: 'outline' },
+    { name: 'pre-hotfixes', variant: 'outline' },
+    { name: 'dev', variant: 'outline' },
   ];
 
   const prodCommands = [
@@ -99,22 +100,11 @@ const BranchingGuide: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <div className="flex flex-wrap gap-2">
-              {quickAccessBranches.map((branch) => (
-                <Button
-                  key={branch.name}
-                  variant={branch.variant}
-                  size="sm"
-                  onClick={() => setSourceBranch(branch.name)}
-                  className={cn(
-                    "text-sm",
-                    sourceBranch === branch.name && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  {branch.name}
-                </Button>
-              ))}
-            </div>
+            <QuickAccessBranches
+              defaultBranches={defaultBranches}
+              selectedBranch={sourceBranch}
+              onBranchSelect={setSourceBranch}
+            />
             <div className="flex gap-4">
               <div>
                 <Label htmlFor="ticket">Ticket Number</Label>

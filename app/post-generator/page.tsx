@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
+import { QuickAccessBranches, type Branch } from "@/components/QuickAccessBranches";
 
 const PostGenerator: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -22,12 +23,12 @@ const PostGenerator: React.FC = () => {
   const { toast } = useToast()
   const [spellErrors, setSpellErrors] = useState<{word: string, suggestions: string[]}[]>([]);
 
-  const quickAccessBranches = [
-    { name: 'master', variant: 'outline' as const },
-    { name: 'hotfixes', variant: 'outline' as const },
-    { name: 'qa-hotfixes', variant: 'outline' as const },
-    { name: 'pre-hotfixes', variant: 'outline' as const },
-    { name: 'dev', variant: 'outline' as const },
+  const defaultBranches: Branch[] = [
+    { name: 'master', variant: 'outline' },
+    { name: 'hotfixes', variant: 'outline' },
+    { name: 'qa-hotfixes', variant: 'outline' },
+    { name: 'pre-hotfixes', variant: 'outline' },
+    { name: 'dev', variant: 'outline' },
   ];
 
   const parseGeneratedPost = (text: string) => {
@@ -241,36 +242,11 @@ ${formatPRs(formData.branch, formData.prs)}
                   />
                 </div>
               ))}
-              <div className="space-y-2">
-                <Label>Branch</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {quickAccessBranches.map((branch) => (
-                    <Button
-                      key={branch.name}
-                      variant={branch.variant}
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setFormData(prev => ({ ...prev, branch: branch.name }));
-                      }}
-                      className={cn(
-                        "text-sm",
-                        formData.branch === branch.name && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      {branch.name}
-                    </Button>
-                  ))}
-                </div>
-                <Input
-                  id="branch"
-                  name="branch"
-                  value={formData.branch}
-                  onChange={handleChange}
-                  placeholder="Enter branch name"
-                  className="w-full"
-                />
-              </div>
+              <QuickAccessBranches
+                defaultBranches={defaultBranches}
+                selectedBranch={formData.branch}
+                onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
+              />
               <div>
                 <Label htmlFor="prs">PRs</Label>
                 <Textarea
