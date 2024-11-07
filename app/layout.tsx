@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import "@/styles/globals.css"
-import { Inter as FontSans } from "next/font/google"
-import { Toaster } from "@/components/ui/toaster"
-import { Sidebar } from "@/components/Layout/Sidebar"
-import { ThemeProvider } from "@/components/theme-provider"
-import { ThemeToggle } from "@/components/theme-toggle"
 
-import { cn } from "@/lib/utils"
+import "@/styles/globals.css";
 
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
+import { Inter as FontSans } from "next/font/google";
+import NextTopLoader from 'nextjs-toploader';
+
+import { Sidebar } from "@/components/Layout/Sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Toaster } from "@/components/ui/toaster";
+
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -33,6 +36,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
+        <NextTopLoader />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
