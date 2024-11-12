@@ -16,6 +16,7 @@ const PostGenerator: React.FC = () => {
     tickets: '',
     description: '',
     solution: '',
+    testingPlan: '',
     branch: 'qa-hotfixes',
     prs: ''
   });
@@ -78,6 +79,7 @@ const PostGenerator: React.FC = () => {
         tickets: sections['tickets'] || prev.tickets,
         description: sections['description'] || prev.description,
         solution: sections['solution'] || prev.solution,
+        testingPlan: sections['testing plan'] || prev.testingPlan,
         branch: branch,
         prs: prSection.split('\n')
           .map(pr => pr.replace(/^.*-> /, '').trim())
@@ -153,6 +155,7 @@ ${formatBulletPoints(updatedData.description)}
 
 Solution:
 ${formatBulletPoints(updatedData.solution)}
+${updatedData.testingPlan ? `\nTesting Plan:\n${formatBulletPoints(updatedData.testingPlan)}` : ''}
 
 PRs:
 ${formatPRs(updatedData.branch, updatedData.prs)}
@@ -230,15 +233,17 @@ ${formatPRs(formData.branch, formData.prs)}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {['tickets', 'description', 'solution'].map((key) => (
+              {['tickets', 'description', 'solution', 'testingPlan'].map((key) => (
                 <div key={key}>
-                  <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
+                  <Label htmlFor={key}>
+                    {key === 'testingPlan' ? 'Testing Plan (Optional)' : key.charAt(0).toUpperCase() + key.slice(1)}
+                  </Label>
                   <Textarea
                     id={key}
                     name={key}
                     value={formData[key as keyof typeof formData]}
                     onChange={handleChange}
-                    placeholder="Enter points (one per line)"
+                    placeholder={key === 'testingPlan' ? "Enter testing steps (optional)" : "Enter points (one per line)"}
                   />
                 </div>
               ))}
