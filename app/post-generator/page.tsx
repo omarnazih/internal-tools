@@ -37,19 +37,14 @@ const initialFormData = {
 
 const defaultTemplates: Template[] = [
   {
-    name: "Hotfix Template",
+    name: "Default Template",
     data: {
+      tickets: "https://trustsecurenow.atlassian.net/browse/CAN-911",
+      description: "Fix the bug in the login page",
+      solution: "Add a new validation rule for the password",
       branch: "qa-hotfixes",
-      testingPlan: "Verify the fix in local environment\nTest edge cases\nRegression testing of related features",
     }
   },
-  {
-    name: "Feature Template",
-    data: {
-      branch: "dev",
-      testingPlan: "1. Unit tests passed\n2. Integration tests passed\n3. Manual testing completed\n4. UI/UX verification",
-    }
-  }
 ];
 
 const PostGenerator: React.FC = () => {
@@ -363,7 +358,6 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle>Form Input</CardTitle>
-                  <CardDescription>Fill in the details for your code review post</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <DropdownMenu>
