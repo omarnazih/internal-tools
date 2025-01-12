@@ -231,81 +231,141 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
 
   return (
     <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="lg:h-[calc(100vh-2rem)] overflow-auto">
           <CardHeader>
             <CardTitle>Code Review Post Generator</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {['tickets', 'description', 'solution', 'testingPlan'].map((key) => (
-                <div key={key}>
-                  <Label htmlFor={key}>
-                    {key === 'testingPlan' ? 'Testing Plan (Optional)' : key.charAt(0).toUpperCase() + key.slice(1)}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Main Information */}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="tickets" className="text-lg font-semibold">
+                    Tickets
                   </Label>
                   <Textarea
-                    id={key}
-                    name={key}
-                    value={formData[key as keyof typeof formData]}
+                    id="tickets"
+                    name="tickets"
+                    value={formData.tickets}
                     onChange={handleChange}
-                    placeholder={key === 'testingPlan' ? "Enter testing steps (optional)" : "Enter points (one per line)"}
+                    placeholder="Enter ticket numbers (one per line)"
+                    className="min-h-[80px]"
                   />
                 </div>
-              ))}
-              <QuickAccessBranches
-                defaultBranches={defaultBranches}
-                selectedBranch={formData.branch}
-                onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
-              />
-              <div className="flex gap-2 items-end">
-                <div className="flex-1">
-                  <Label htmlFor="custom-branch">Custom Branch</Label>
+
+                <div>
+                  <Label htmlFor="description" className="text-lg font-semibold">
+                    Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Enter description points (one per line)"
+                    className="min-h-[120px]"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="solution" className="text-lg font-semibold">
+                    Solution
+                  </Label>
+                  <Textarea
+                    id="solution"
+                    name="solution"
+                    value={formData.solution}
+                    onChange={handleChange}
+                    placeholder="Enter solution points (one per line)"
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </div>
+
+              {/* Testing and Documentation */}
+              <div className="space-y-4 pt-2 border-t">
+                <div>
+                  <Label htmlFor="testingPlan" className="text-lg font-semibold">
+                    Testing Plan (Optional)
+                  </Label>
+                  <Textarea
+                    id="testingPlan"
+                    name="testingPlan"
+                    value={formData.testingPlan}
+                    onChange={handleChange}
+                    placeholder="Enter testing steps (optional)"
+                    className="min-h-[80px]"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="documentationLink" className="text-lg font-semibold">
+                    Documentation Link (Optional)
+                  </Label>
                   <Input
-                    id="custom-branch"
-                    name="branch"
-                    value={formData.branch}
+                    id="documentationLink"
+                    name="documentationLink"
+                    value={formData.documentationLink}
                     onChange={handleChange}
-                    placeholder="Enter custom branch name"
+                    placeholder="Enter documentation link"
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="prs">PRs</Label>
-                <Textarea
-                  id="prs"
-                  name="prs"
-                  value={formData.prs}
-                  onChange={handleChange}
-                  placeholder="Enter PR links or text (one per line)"
-                />
+
+              {/* Branch and PRs */}
+              <div className="space-y-4 pt-2 border-t">
+                <div>
+                  <Label className="text-lg font-semibold mb-2 block">Branch Selection</Label>
+                  <QuickAccessBranches
+                    defaultBranches={defaultBranches}
+                    selectedBranch={formData.branch}
+                    onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
+                  />
+                  <div className="mt-2">
+                    <Label htmlFor="custom-branch">Custom Branch</Label>
+                    <Input
+                      id="custom-branch"
+                      name="branch"
+                      value={formData.branch}
+                      onChange={handleChange}
+                      placeholder="Enter custom branch name"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="prs" className="text-lg font-semibold">
+                    Pull Requests
+                  </Label>
+                  <Textarea
+                    id="prs"
+                    name="prs"
+                    value={formData.prs}
+                    onChange={handleChange}
+                    placeholder="Enter PR links (one per line)"
+                    className="min-h-[80px]"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="documentationLink">Documentation Link (Optional)</Label>
-                <Input
-                  id="documentationLink"
-                  name="documentationLink"
-                  value={formData.documentationLink}
-                  onChange={handleChange}
-                  placeholder="Enter documentation link"
-                />
-              </div>
-              <Button type="submit">Generate Post</Button>
+
+              <Button type="submit" className="w-full">Generate Post</Button>
             </form>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="lg:h-[calc(100vh-2rem)] overflow-auto">
           <CardHeader>
             <CardTitle>Generated Post</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Textarea
-              className="min-h-[200px] mb-4"
+              className="min-h-[calc(100vh-15rem)]"
               value={generatedPost}
               onChange={handleGeneratedPostChange}
               placeholder="Generated post will appear here"
             />
-            <Button onClick={copyToClipboard} disabled={!generatedPost}>
+            <Button onClick={copyToClipboard} disabled={!generatedPost} className="w-full">
               Copy to Clipboard
             </Button>
           </CardContent>
