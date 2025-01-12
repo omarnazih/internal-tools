@@ -18,7 +18,8 @@ const PostGenerator: React.FC = () => {
     solution: '',
     testingPlan: '',
     branch: 'qa-hotfixes',
-    prs: ''
+    prs: '',
+    documentationLink: ''
   });
   const [generatedPost, setGeneratedPost] = useState('');
   const { toast } = useToast()
@@ -83,7 +84,8 @@ const PostGenerator: React.FC = () => {
         branch: branch,
         prs: prSection.split('\n')
           .map(pr => pr.replace(/^.*-> /, '').trim())
-          .join('\n')
+          .join('\n'),
+        documentationLink: sections['documentation'] || prev.documentationLink
       }));
     } catch (error) {
       toast({
@@ -159,6 +161,7 @@ ${updatedData.testingPlan ? `\nTesting Plan:\n${formatBulletPoints(updatedData.t
 
 PRs:
 ${formatPRs(updatedData.branch, updatedData.prs)}
+${updatedData.documentationLink ? `\nDocumentation:\n\t• ${updatedData.documentationLink}` : ''}
     `.trim();
     setGeneratedPost(post);
   };
@@ -203,9 +206,11 @@ ${formatBulletPoints(formData.description)}
 
 Solution:
 ${formatBulletPoints(formData.solution)}
+${formData.testingPlan ? `\nTesting Plan:\n${formatBulletPoints(formData.testingPlan)}` : ''}
 
 PRs:
 ${formatPRs(formData.branch, formData.prs)}
+${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentationLink}` : ''}
     `.trim();
     setGeneratedPost(post);
   };
@@ -272,6 +277,16 @@ ${formatPRs(formData.branch, formData.prs)}
                   value={formData.prs}
                   onChange={handleChange}
                   placeholder="Enter PR links or text (one per line)"
+                />
+              </div>
+              <div>
+                <Label htmlFor="documentationLink">Documentation Link (Optional)</Label>
+                <Input
+                  id="documentationLink"
+                  name="documentationLink"
+                  value={formData.documentationLink}
+                  onChange={handleChange}
+                  placeholder="Enter documentation link"
                 />
               </div>
               <Button type="submit">Generate Post</Button>
