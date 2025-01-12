@@ -1,29 +1,65 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Copy, Save, Wand2, FileDown, Sun, Moon, Trash2 } from "lucide-react";
 import { QuickAccessBranches, type Branch } from "@/components/QuickAccessBranches";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTheme } from "next-themes";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+interface Template {
+  name: string;
+  data: Partial<typeof initialFormData>;
+}
+
+const initialFormData = {
+  tickets: '',
+  description: '',
+  solution: '',
+  testingPlan: '',
+  branch: 'qa-hotfixes',
+  prs: '',
+  documentationLink: ''
+};
+
+const defaultTemplates: Template[] = [
+  {
+    name: "Default Template",
+    data: {
+      tickets: "https://trustsecurenow.atlassian.net/browse/CAN-911",
+      description: "Fix the bug in the login page",
+      solution: "Add a new validation rule for the password",
+      branch: "qa-hotfixes",
+    }
+  },
+];
 
 const PostGenerator: React.FC = () => {
-  const [formData, setFormData] = useState({
-    tickets: '',
-    description: '',
-    solution: '',
-    testingPlan: '',
-    branch: 'qa-hotfixes',
-    prs: '',
-    documentationLink: ''
-  });
+  const [formData, setFormData] = useState(initialFormData);
   const [generatedPost, setGeneratedPost] = useState('');
-  const { toast } = useToast()
   const [spellErrors, setSpellErrors] = useState<{word: string, suggestions: string[]}[]>([]);
+  const [savedTemplates, setSavedTemplates] = useState<Template[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('post-generator-templates');
+      return stored ? [...defaultTemplates, ...JSON.parse(stored)] : defaultTemplates;
+    }
+    return defaultTemplates;
+  });
+  const { toast } = useToast();
+  const { theme, setTheme } = useTheme(); 
 
   const defaultBranches: Branch[] = [
     { name: 'master', variant: 'outline' },
@@ -229,145 +265,297 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
     parseGeneratedPost(newValue);
   };
 
+  const handleTemplateSelect = (templateName: string) => {
+    const template = savedTemplates.find(t => t.name === templateName);
+    if (template) {
+      setFormData(prev => ({
+        ...prev,
+        ...template.data
+      }));
+      toast({
+        title: "Template Applied",
+        description: `Applied template: ${templateName}`
+      });
+    }
+  };
+
+  const saveAsTemplate = () => {
+    const templateName = prompt("Enter template name:");
+    if (templateName) {
+      const newTemplate = {
+        name: templateName,
+        data: formData
+      };
+      setSavedTemplates(prev => {
+        const updated = [...prev, newTemplate];
+        // Save only user templates (exclude default ones)
+        const userTemplates = updated.slice(defaultTemplates.length);
+        localStorage.setItem('post-generator-templates', JSON.stringify(userTemplates));
+        return updated;
+      });
+      toast({
+        title: "Template Saved",
+        description: `Saved template: ${templateName}`
+      });
+    }
+  };
+
+  const deleteTemplate = (templateName: string) => {
+    if (defaultTemplates.some(t => t.name === templateName)) {
+      toast({
+        variant: "destructive",
+        title: "Cannot delete default template",
+        description: "Default templates cannot be deleted"
+      });
+      return;
+    }
+
+    if (confirm(`Are you sure you want to delete template "${templateName}"?`)) {
+      setSavedTemplates(prev => {
+        const updated = prev.filter(t => t.name !== templateName);
+        // Save only user templates (exclude default ones)
+        const userTemplates = updated.slice(defaultTemplates.length);
+        localStorage.setItem('post-generator-templates', JSON.stringify(userTemplates));
+        return updated;
+      });
+      toast({
+        title: "Template Deleted",
+        description: `Deleted template: ${templateName}`
+      });
+    }
+  };
+
+  const clearForm = () => {
+    if (confirm("Are you sure you want to clear all fields?")) {
+      setFormData(initialFormData);
+      setGeneratedPost('');
+      toast({
+        title: "Form Cleared",
+        description: "All fields have been reset"
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Code Review Post Generator</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="lg:h-[calc(100vh-2rem)] overflow-auto">
-          <CardHeader>
-            <CardTitle>Code Review Post Generator</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Main Information */}
-              <div className="space-y-4">
+        <div className="space-y-6">
+          <Card className="border-t-4 border-t-primary">
+            <CardHeader>
+              <div className="flex justify-between items-center">
                 <div>
-                  <Label htmlFor="tickets" className="text-lg font-semibold">
-                    Tickets
-                  </Label>
-                  <Textarea
-                    id="tickets"
-                    name="tickets"
-                    value={formData.tickets}
-                    onChange={handleChange}
-                    placeholder="Enter ticket numbers (one per line)"
-                    className="min-h-[80px]"
-                  />
+                  <CardTitle>Form Input</CardTitle>
                 </div>
-
-                <div>
-                  <Label htmlFor="description" className="text-lg font-semibold">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Enter description points (one per line)"
-                    className="min-h-[120px]"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="solution" className="text-lg font-semibold">
-                    Solution
-                  </Label>
-                  <Textarea
-                    id="solution"
-                    name="solution"
-                    value={formData.solution}
-                    onChange={handleChange}
-                    placeholder="Enter solution points (one per line)"
-                    className="min-h-[120px]"
-                  />
-                </div>
-              </div>
-
-              {/* Testing and Documentation */}
-              <div className="space-y-4 pt-2 border-t">
-                <div>
-                  <Label htmlFor="testingPlan" className="text-lg font-semibold">
-                    Testing Plan (Optional)
-                  </Label>
-                  <Textarea
-                    id="testingPlan"
-                    name="testingPlan"
-                    value={formData.testingPlan}
-                    onChange={handleChange}
-                    placeholder="Enter testing steps (optional)"
-                    className="min-h-[80px]"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="documentationLink" className="text-lg font-semibold">
-                    Documentation Link (Optional)
-                  </Label>
-                  <Input
-                    id="documentationLink"
-                    name="documentationLink"
-                    value={formData.documentationLink}
-                    onChange={handleChange}
-                    placeholder="Enter documentation link"
-                  />
+                <div className="flex gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        Templates
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {savedTemplates.map((template) => (
+                        <DropdownMenuItem
+                          key={template.name}
+                          className="flex items-center justify-between"
+                        >
+                          <span
+                            className="flex-1 cursor-pointer"
+                            onClick={() => handleTemplateSelect(template.name)}
+                          >
+                            {template.name}
+                          </span>
+                          {!defaultTemplates.some(t => t.name === template.name) && (
+                            <Trash2
+                              className="h-4 w-4 ml-2 cursor-pointer hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteTemplate(template.name);
+                              }}
+                            />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="outline" size="sm" onClick={saveAsTemplate}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Template
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={clearForm}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear
+                  </Button>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="main" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="main">Main Info</TabsTrigger>
+                  <TabsTrigger value="testing">Testing & Docs</TabsTrigger>
+                  <TabsTrigger value="branch">Branch & PRs</TabsTrigger>
+                </TabsList>
 
-              {/* Branch and PRs */}
-              <div className="space-y-4 pt-2 border-t">
-                <div>
-                  <Label className="text-lg font-semibold mb-2 block">Branch Selection</Label>
-                  <QuickAccessBranches
-                    defaultBranches={defaultBranches}
-                    selectedBranch={formData.branch}
-                    onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
-                  />
-                  <div className="mt-2">
-                    <Label htmlFor="custom-branch">Custom Branch</Label>
-                    <Input
-                      id="custom-branch"
-                      name="branch"
-                      value={formData.branch}
+                <TabsContent value="main" className="space-y-4 mt-4">
+                  <div>
+                    <Label htmlFor="tickets" className="text-lg font-semibold">
+                      Tickets
+                    </Label>
+                    <Textarea
+                      id="tickets"
+                      name="tickets"
+                      value={formData.tickets}
                       onChange={handleChange}
-                      placeholder="Enter custom branch name"
+                      placeholder="Enter ticket numbers (one per line)"
+                      className="min-h-[80px] font-mono"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <Label htmlFor="prs" className="text-lg font-semibold">
-                    Pull Requests
-                  </Label>
-                  <Textarea
-                    id="prs"
-                    name="prs"
-                    value={formData.prs}
-                    onChange={handleChange}
-                    placeholder="Enter PR links (one per line)"
-                    className="min-h-[80px]"
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="description" className="text-lg font-semibold">
+                      Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Enter description points (one per line)"
+                      className="min-h-[120px] font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="solution" className="text-lg font-semibold">
+                      Solution
+                    </Label>
+                    <Textarea
+                      id="solution"
+                      name="solution"
+                      value={formData.solution}
+                      onChange={handleChange}
+                      placeholder="Enter solution points (one per line)"
+                      className="min-h-[120px] font-mono"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="testing" className="space-y-4 mt-4">
+                  <div>
+                    <Label htmlFor="testingPlan" className="text-lg font-semibold">
+                      Testing Plan (Optional)
+                    </Label>
+                    <Textarea
+                      id="testingPlan"
+                      name="testingPlan"
+                      value={formData.testingPlan}
+                      onChange={handleChange}
+                      placeholder="Enter testing steps (optional)"
+                      className="min-h-[120px] font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="documentationLink" className="text-lg font-semibold">
+                      Documentation Link (Optional)
+                    </Label>
+                    <Input
+                      id="documentationLink"
+                      name="documentationLink"
+                      value={formData.documentationLink}
+                      onChange={handleChange}
+                      placeholder="Enter documentation link"
+                      className="font-mono"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="branch" className="space-y-4 mt-4">
+                  <div>
+                    <Label className="text-lg font-semibold mb-2 block">Branch Selection</Label>
+                    <QuickAccessBranches
+                      defaultBranches={defaultBranches}
+                      selectedBranch={formData.branch}
+                      onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
+                    />
+                    <div className="mt-2">
+                      <Label htmlFor="custom-branch">Custom Branch</Label>
+                      <Input
+                        id="custom-branch"
+                        name="branch"
+                        value={formData.branch}
+                        onChange={handleChange}
+                        placeholder="Enter custom branch name"
+                        className="font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="prs" className="text-lg font-semibold">
+                      Pull Requests
+                    </Label>
+                    <Textarea
+                      id="prs"
+                      name="prs"
+                      value={formData.prs}
+                      onChange={handleChange}
+                      placeholder="Enter PR links (one per line)"
+                      className="min-h-[120px] font-mono"
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="mt-6">
+                <Button type="submit" className="w-full" onClick={handleSubmit}>
+                  Generate Post
+                </Button>
               </div>
-
-              <Button type="submit" className="w-full">Generate Post</Button>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
         
-        <Card className="lg:h-[calc(100vh-2rem)] overflow-auto">
+        <Card className="border-t-4 border-t-secondary lg:h-[calc(100vh-8rem)] overflow-auto">
           <CardHeader>
-            <CardTitle>Generated Post</CardTitle>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Generated Post</CardTitle>
+                <CardDescription>Preview and copy your generated post</CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyToClipboard}
+                disabled={!generatedPost}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <Textarea
-              className="min-h-[calc(100vh-15rem)]"
+              className="min-h-[calc(100vh-20rem)] font-mono"
               value={generatedPost}
               onChange={handleGeneratedPostChange}
-              placeholder="Generated post will appear here"
+              placeholder="Generated post will appear here..."
             />
-            <Button onClick={copyToClipboard} disabled={!generatedPost} className="w-full">
-              Copy to Clipboard
-            </Button>
           </CardContent>
         </Card>
       </div>
