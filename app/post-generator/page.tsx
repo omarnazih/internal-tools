@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CopyButton } from "@/components/ui/copy-to-clipboard-button";
 
 interface Template {
   name: string;
@@ -51,6 +52,13 @@ const PostGenerator: React.FC = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [generatedPost, setGeneratedPost] = useState('');
   const [spellErrors, setSpellErrors] = useState<{word: string, suggestions: string[]}[]>([]);
+  const [customBranches, setCustomBranches] = useState<Branch[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('custom-branches');
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
   const [savedTemplates, setSavedTemplates] = useState<Template[]>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('post-generator-templates');
@@ -336,6 +344,53 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
     }
   };
 
+  const saveCustomBranch = () => {
+    const branchName = formData.branch.trim();
+    if (!branchName) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Branch Name",
+        description: "Please enter a branch name"
+      });
+      return;
+    }
+
+    if (defaultBranches.some(b => b.name === branchName) || 
+        customBranches.some(b => b.name === branchName)) {
+      toast({
+        variant: "destructive",
+        title: "Branch Already Exists",
+        description: "This branch name is already saved"
+      });
+      return;
+    }
+
+    const newBranch: Branch = { name: branchName, variant: 'outline' };
+    setCustomBranches(prev => {
+      const updated = [...prev, newBranch];
+      localStorage.setItem('custom-branches', JSON.stringify(updated));
+      return updated;
+    });
+
+    toast({
+      title: "Branch Saved",
+      description: `Saved branch: ${branchName}`
+    });
+  };
+
+  const deleteCustomBranch = (branchName: string) => {
+    setCustomBranches(prev => {
+      const updated = prev.filter(b => b.name !== branchName);
+      localStorage.setItem('custom-branches', JSON.stringify(updated));
+      return updated;
+    });
+
+    toast({
+      title: "Branch Deleted",
+      description: `Deleted branch: ${branchName}`
+    });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -494,7 +549,19 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
                       onBranchSelect={(branchName) => setFormData(prev => ({ ...prev, branch: branchName }))}
                     />
                     <div className="mt-2">
-                      <Label htmlFor="custom-branch">Custom Branch</Label>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label htmlFor="custom-branch">Custom Branch</Label>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={saveCustomBranch}
+                          >
+                            <Save className="h-4 w-4 mr-2" />
+                            Save Branch
+                          </Button>
+                        </div>
+                      </div>
                       <Input
                         id="custom-branch"
                         name="branch"
@@ -503,6 +570,36 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
                         placeholder="Enter custom branch name"
                         className="font-mono"
                       />
+                      {customBranches.length > 0 && (
+                        <div className="mt-4">
+                          <Label className="text-sm text-muted-foreground mb-2 block">Saved Custom Branches</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {customBranches.map((branch) => (
+                              <div
+                                key={branch.name}
+                                className="flex items-center gap-1 bg-secondary/50 rounded-md px-2 py-1"
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-auto p-1 hover:bg-transparent"
+                                  onClick={() => setFormData(prev => ({ ...prev, branch: branch.name }))}
+                                >
+                                  {branch.name}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-auto p-1 hover:bg-transparent hover:text-destructive"
+                                  onClick={() => deleteCustomBranch(branch.name)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -538,15 +635,13 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
                 <CardTitle>Generated Post</CardTitle>
                 <CardDescription>Preview and copy your generated post</CardDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyToClipboard}
-                disabled={!generatedPost}
+              <CopyButton
+                onCopy={async () => {
+                  await navigator.clipboard.writeText(generatedPost);
+                  toast({ title: "Copied to clipboard" });
+                }}
               >
-                <Copy className="h-4 w-4 mr-2" />
-                Copy to Clipboard
-              </Button>
+              </CopyButton>
             </div>
           </CardHeader>
           <CardContent>
