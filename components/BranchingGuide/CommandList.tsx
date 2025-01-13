@@ -14,9 +14,9 @@ export const CommandList: React.FC<CommandListProps> = ({ commands }) => {
 
   const copyCommand = (command: string) => {
     navigator.clipboard.writeText(command).then(() => {
-      toast({ title: "Command copied to clipboard" });
+      toast({ title: "Command copied to clipboard", duration: 500 });
     }).catch(() => {
-      toast({ variant: "destructive", title: "Failed to copy command" });
+      toast({ variant: "destructive", title: "Failed to copy command", duration: 500 });
     });
   };
 
