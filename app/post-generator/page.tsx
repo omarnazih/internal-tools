@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CopyButton } from "@/components/ui/copy-to-clipboard-button";
 
 interface Template {
   name: string;
@@ -634,15 +635,13 @@ ${formData.documentationLink ? `\nDocumentation:\n\t• ${formData.documentation
                 <CardTitle>Generated Post</CardTitle>
                 <CardDescription>Preview and copy your generated post</CardDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyToClipboard}
-                disabled={!generatedPost}
+              <CopyButton
+                onCopy={async () => {
+                  await navigator.clipboard.writeText(generatedPost);
+                  toast({ title: "Copied to clipboard" });
+                }}
               >
-                <Copy className="h-4 w-4 mr-2" />
-                Copy to Clipboard
-              </Button>
+              </CopyButton>
             </div>
           </CardHeader>
           <CardContent>
