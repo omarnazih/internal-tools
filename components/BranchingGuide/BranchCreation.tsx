@@ -29,7 +29,7 @@ export const BranchCreation: React.FC<BranchCreationProps> = ({
     },
     {
       description: "4. Create a pull request",
-      command: `gh pr create --base ${sourceBranch} --title "${ticketNumber} - ${sourceBranch}" --body "This PR is for ${ticketNumber} on ${sourceBranch} branch" --web`
+      command: `gh pr create --base ${sourceBranch} --title "[${ticketNumber}] - [${sourceBranch}]" --body "This PR is for [${ticketNumber}] on [${sourceBranch}] branch" --web`
     }     
   ];
 
