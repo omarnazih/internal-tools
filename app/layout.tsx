@@ -4,12 +4,14 @@ import "@/styles/globals.css";
 
 import { Analytics } from "@vercel/analytics/react";
 import { Inter as FontSans } from "next/font/google";
+import { Noto_Sans_Arabic } from "next/font/google";
 import NextTopLoader from 'nextjs-toploader';
 
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/toaster";
+import RamadanTheme from "@/components/RamadanTheme";
 
 import { cn } from "@/lib/utils";
 
@@ -21,7 +23,13 @@ export const metadata: Metadata = {
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
+
+const arabicFont = Noto_Sans_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-arabic",
+  weight: ["400", "700"],
+});
 
 export default function RootLayout({
   children,
@@ -33,7 +41,8 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          fontSans.variable,
+          arabicFont.variable
         )}
       >
         <NextTopLoader />
@@ -43,6 +52,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <RamadanTheme />
           <div className="flex min-h-screen relative">
             <Sidebar />
             <div className="flex-1">
