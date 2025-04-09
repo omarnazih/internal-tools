@@ -32,33 +32,55 @@ const Lantern = () => (
 );
 
 const RamadanTheme = () => {
-    const [isVisible, setIsVisible] = useState(true);
+  const isRamadan = () => {
+    const today = new Date();
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setIsVisible(v => !v);
-        }, 2000);
-        return () => clearInterval(interval);
-    }, []);
+    const hijriFormatter = new Intl.DateTimeFormat("en-u-ca-islamic", {
+      month: "numeric",
+      day: "numeric",
+    });
 
-    return (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center gap-2">
-            <div className="flex items-center gap-3">
-                <CrescentMoon />
-                <div
-                    className={`text-2xl font-arabic transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-60'
-                        }`}
-                    style={{
-                        color: '#FFD700',
-                        textShadow: '0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700',
-                    }}
-                >
-                    رمضان مبارك
-                </div>
-                <Lantern />
-            </div>
-        </div>
+    const hijriParts = hijriFormatter.formatToParts(today);
+    const hijriMonth = parseInt(
+      hijriParts.find((part) => part.type === "month")?.value || "0"
     );
+
+    return hijriMonth === 9;
+  };
+
+  // Only render Ramadan-specific content if it's Ramadan
+  if (!isRamadan()) {
+    return null;
+  }
+
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsVisible((v) => !v);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center gap-2">
+      <div className="flex items-center gap-3">
+        <CrescentMoon />
+        <div
+          className={`text-2xl font-arabic transition-opacity duration-1000 ${
+            isVisible ? "opacity-100" : "opacity-60"
+          }`}
+          style={{
+            color: "#FFD700",
+            textShadow: "0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700",
+          }}
+        >
+          رمضان مبارك
+        </div>
+        <Lantern />
+      </div>
+    </div>
+  );
 };
 
-export default RamadanTheme; 
+export default RamadanTheme;
